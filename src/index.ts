@@ -49,6 +49,7 @@ export default function mpAdapter (config: AxiosRequestConfig) :AxiosPromise {
 
     // HTTP basic authentication
     if (config.auth) {
+      requestHeaders = {}
       const [username, password] = [config.auth.username || '', config.auth.password || '']
       requestHeaders.Authorization = 'Basic ' + encode(username + ':' + password)
     }
@@ -59,7 +60,7 @@ export default function mpAdapter (config: AxiosRequestConfig) :AxiosPromise {
       if ((typeof requestData === 'undefined' && _header === 'content-type') || _header === 'referer') {
         // Remove Content-Type if data is undefined
         // And the miniprogram document said that '设置请求的 header，header 中不能设置 Referer'
-        delete requestHeaders[key]
+        requestHeaders && delete requestHeaders[key]
       }
     })
     mpRequestOption.header = requestHeaders
