@@ -3,6 +3,7 @@
 import common from './rollup'
 import nodeResolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 
 const isProd = process.env.NODE_ENV === 'production'
 export default {
@@ -18,6 +19,7 @@ export default {
   // 小程序不支持包内require别的包，必须把别的包也一起打包进来
   external: isProd ? [] : common.external,
   plugins: [
+    json(),
     nodeResolve({
       main: true,
       extensions: ['.ts', '.js']

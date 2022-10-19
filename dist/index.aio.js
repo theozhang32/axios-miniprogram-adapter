@@ -1,21 +1,18 @@
 /*!
- * axios-miniprogram-adapter 0.3.4 (https://github.com/bigMeow/axios-miniprogram-adapter)
- * API https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/doc/api.md
- * Copyright 2018-2022 bigMeow. All Rights Reserved
- * Licensed under MIT (https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/LICENSE)
+ * axios-miniprogram-adapter 1.1.3 (https://github.com/theozhang32/axios-miniprogram-adapter)
  */
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('axios/lib/utils'), require('axios/lib/core/settle'), require('axios/lib/helpers/buildURL'), require('axios/lib/core/buildFullPath'), require('axios/lib/core/createError')) :
-  typeof define === 'function' && define.amd ? define(['axios/lib/utils', 'axios/lib/core/settle', 'axios/lib/helpers/buildURL', 'axios/lib/core/buildFullPath', 'axios/lib/core/createError'], factory) :
-  (global = global || self, global['axios-miniprogram-adapter'] = factory(global.utils, global.settle, global.buildURL, global.buildFullPath, global.createError));
-}(this, (function (utils, settle, buildURL, buildFullPath, createError) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('axios/lib/utils'), require('axios/lib/core/settle'), require('axios/lib/helpers/buildURL'), require('axios/lib/core/buildFullPath'), require('axios/lib/core/AxiosError')) :
+  typeof define === 'function' && define.amd ? define(['axios/lib/utils', 'axios/lib/core/settle', 'axios/lib/helpers/buildURL', 'axios/lib/core/buildFullPath', 'axios/lib/core/AxiosError'], factory) :
+  (global = global || self, global['axios-miniprogram-adapter'] = factory(global.utils, global.settle, global.buildURL, global.buildFullPath, global.AxiosError));
+}(this, (function (utils, settle, buildURL, buildFullPath, AxiosError) { 'use strict';
 
   utils = utils && Object.prototype.hasOwnProperty.call(utils, 'default') ? utils['default'] : utils;
   settle = settle && Object.prototype.hasOwnProperty.call(settle, 'default') ? settle['default'] : settle;
   buildURL = buildURL && Object.prototype.hasOwnProperty.call(buildURL, 'default') ? buildURL['default'] : buildURL;
   buildFullPath = buildFullPath && Object.prototype.hasOwnProperty.call(buildFullPath, 'default') ? buildFullPath['default'] : buildFullPath;
-  createError = createError && Object.prototype.hasOwnProperty.call(createError, 'default') ? createError['default'] : createError;
+  AxiosError = AxiosError && Object.prototype.hasOwnProperty.call(AxiosError, 'default') ? AxiosError['default'] : AxiosError;
 
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   // encoder
@@ -43,6 +40,7 @@
       return output;
   }
 
+  // import createError from 'axios/lib/core/createError'
   var platFormName = "wechat" /* 微信 */;
   /**
    * 获取各个平台的请求函数
@@ -110,35 +108,42 @@
           case "wechat" /* 微信 */:
               if (error.errMsg.indexOf('request:fail abort') !== -1) {
                   // Handle request cancellation (as opposed to a manual cancellation)
-                  reject(createError('Request aborted', config, 'ECONNABORTED', ''));
+                  // reject(createError('Request aborted', config, 'ECONNABORTED', ''))
+                  reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''));
               }
               else if (error.errMsg.indexOf('timeout') !== -1) {
                   // timeout
-                  reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''));
+                  // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''))
+                  reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, ''));
               }
               else {
                   // NetWordError
-                  reject(createError('Network Error', config, null, ''));
+                  // reject(createError('Network Error', config, null, ''))
+                  reject(new AxiosError('Network Error', null, config, ''));
               }
               break;
           case "dd" /* 钉钉 */:
           case "alipay" /* 支付宝 */:
               // https://docs.alipay.com/mini/api/network
               if ([14, 19].includes(error.error)) {
-                  reject(createError('Request aborted', config, 'ECONNABORTED', '', error));
+                  // reject(createError('Request aborted', config, 'ECONNABORTED', '', error))
+                  reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''));
               }
               else if ([13].includes(error.error)) {
                   // timeout
-                  reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error));
+                  // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error))
+                  reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, '', error));
               }
               else {
                   // NetWordError
-                  reject(createError('Network Error', config, null, '', error));
+                  // reject(createError('Network Error', config, null, '', error))
+                  reject(new AxiosError('Network Error', null, config, '', error));
               }
               break;
           case "baidu" /* 百度 */:
               // TODO error.errCode
-              reject(createError('Network Error', config, null, ''));
+              // reject(createError('Network Error', config, null, ''))
+              reject(new AxiosError('Network Error', null, config, ''));
               break;
       }
   }
@@ -195,6 +200,7 @@
           };
           // HTTP basic authentication
           if (config.auth) {
+              requestHeaders = {};
               var _a = [config.auth.username || '', config.auth.password || ''], username = _a[0], password = _a[1];
               requestHeaders.Authorization = 'Basic ' + encoder(username + ':' + password);
           }
@@ -204,7 +210,7 @@
               if ((typeof requestData === 'undefined' && _header === 'content-type') || _header === 'referer') {
                   // Remove Content-Type if data is undefined
                   // And the miniprogram document said that '设置请求的 header，header 中不能设置 Referer'
-                  delete requestHeaders[key];
+                  requestHeaders && delete requestHeaders[key];
               }
           });
           mpRequestOption.header = requestHeaders;

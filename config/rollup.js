@@ -7,10 +7,7 @@ const version = pkg.version
 
 const banner =
 `/*!
- * axios-miniprogram-adapter ${version} (https://github.com/bigMeow/axios-miniprogram-adapter)
- * API https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/doc/api.md
- * Copyright 2018-${(new Date()).getFullYear()} bigMeow. All Rights Reserved
- * Licensed under MIT (https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/LICENSE)
+ * axios-miniprogram-adapter ${version} (https://github.com/theozhang32/axios-miniprogram-adapter)
  */
 `
 
@@ -23,7 +20,7 @@ const external = [
   'axios/lib/core/buildFullPath',
   'axios/lib/utils',
   'axios/lib/core/settle',
-  'axios/lib/core/createError'
+  'axios/lib/core/AxiosError'
 ]
 
 export default {

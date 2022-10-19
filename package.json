@@ -20,14 +20,14 @@
     "mocha": "mocha",
     "release": "git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags"
   },
-  "author": "bigMeow(lizong9527@gmail.com)",
+  "author": "TheoZhang(theozhang.tech@outlook.com)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/bigMeow/axios-miniprogram-adapter.git"
+    "url": "git://github.com/theozhang32/axios-miniprogram-adapter.git"
   },
   "bugs": {
-    "url": "https://github.com/bigMeow/axios-miniprogram-adapter/issues"
+    "url": "https://github.com/theozhang32/axios-miniprogram-adapter/issues"
   },
   "keywords": [
     "axios",
@@ -38,6 +38,7 @@
   ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "^13.0.0",
+    "@rollup/plugin-json": "^5.0.0",
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/eslint-config-typescript": "^3.1.1",

@@ -1,4 +1,5 @@
-import createError from 'axios/lib/core/createError'
+// import createError from 'axios/lib/core/createError'
+import AxiosError from 'axios/lib/core/AxiosError'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 
 const enum EnumPlatForm {
@@ -79,31 +80,38 @@ export function transformError (error:any, reject, config) {
     case EnumPlatForm.微信:
       if (error.errMsg.indexOf('request:fail abort') !== -1) {
         // Handle request cancellation (as opposed to a manual cancellation)
-        reject(createError('Request aborted', config, 'ECONNABORTED', ''))
+        // reject(createError('Request aborted', config, 'ECONNABORTED', ''))
+        reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''))
       } else if (error.errMsg.indexOf('timeout') !== -1) {
         // timeout
-        reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''))
+        // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''))
+        reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, ''))
       } else {
         // NetWordError
-        reject(createError('Network Error', config, null, ''))
+        // reject(createError('Network Error', config, null, ''))
+        reject(new AxiosError('Network Error', null, config, ''))
       }
       break
     case EnumPlatForm.钉钉:
     case EnumPlatForm.支付宝:
       // https://docs.alipay.com/mini/api/network
       if ([14, 19].includes(error.error)) {
-        reject(createError('Request aborted', config, 'ECONNABORTED', '', error))
+        // reject(createError('Request aborted', config, 'ECONNABORTED', '', error))
+        reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''))
       } else if ([13].includes(error.error)) {
         // timeout
-        reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error))
+        // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error))
+        reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, '', error))
       } else {
         // NetWordError
-        reject(createError('Network Error', config, null, '', error))
+        // reject(createError('Network Error', config, null, '', error))
+        reject(new AxiosError('Network Error', null, config, '', error))
       }
       break
     case EnumPlatForm.百度:
       // TODO error.errCode
-      reject(createError('Network Error', config, null, ''))
+      // reject(createError('Network Error', config, null, ''))
+      reject(new AxiosError('Network Error', null, config, ''))
       break
   }
 }

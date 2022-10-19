@@ -1,8 +1,5 @@
 /*!
- * axios-miniprogram-adapter 0.3.4 (https://github.com/bigMeow/axios-miniprogram-adapter)
- * API https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/doc/api.md
- * Copyright 2018-2022 bigMeow. All Rights Reserved
- * Licensed under MIT (https://github.com/bigMeow/axios-miniprogram-adapter/blob/master/LICENSE)
+ * axios-miniprogram-adapter 1.1.3 (https://github.com/theozhang32/axios-miniprogram-adapter)
  */
 
 'use strict';
@@ -13,7 +10,7 @@ var utils = _interopDefault(require('axios/lib/utils'));
 var settle = _interopDefault(require('axios/lib/core/settle'));
 var buildURL = _interopDefault(require('axios/lib/helpers/buildURL'));
 var buildFullPath = _interopDefault(require('axios/lib/core/buildFullPath'));
-var createError = _interopDefault(require('axios/lib/core/createError'));
+var AxiosError = _interopDefault(require('axios/lib/core/AxiosError'));
 
 var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 // encoder
@@ -41,6 +38,7 @@ function encoder(input) {
     return output;
 }
 
+// import createError from 'axios/lib/core/createError'
 var platFormName = "wechat" /* 微信 */;
 /**
  * 获取各个平台的请求函数
@@ -108,35 +106,42 @@ function transformError(error, reject, config) {
         case "wechat" /* 微信 */:
             if (error.errMsg.indexOf('request:fail abort') !== -1) {
                 // Handle request cancellation (as opposed to a manual cancellation)
-                reject(createError('Request aborted', config, 'ECONNABORTED', ''));
+                // reject(createError('Request aborted', config, 'ECONNABORTED', ''))
+                reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''));
             }
             else if (error.errMsg.indexOf('timeout') !== -1) {
                 // timeout
-                reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''));
+                // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', ''))
+                reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, ''));
             }
             else {
                 // NetWordError
-                reject(createError('Network Error', config, null, ''));
+                // reject(createError('Network Error', config, null, ''))
+                reject(new AxiosError('Network Error', null, config, ''));
             }
             break;
         case "dd" /* 钉钉 */:
         case "alipay" /* 支付宝 */:
             // https://docs.alipay.com/mini/api/network
             if ([14, 19].includes(error.error)) {
-                reject(createError('Request aborted', config, 'ECONNABORTED', '', error));
+                // reject(createError('Request aborted', config, 'ECONNABORTED', '', error))
+                reject(new AxiosError('Request aborted', 'ECONNABORTED', config, ''));
             }
             else if ([13].includes(error.error)) {
                 // timeout
-                reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error));
+                // reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED', '', error))
+                reject(new AxiosError('timeout of ' + config.timeout + 'ms exceeded', 'ECONNABORTED', config, '', error));
             }
             else {
                 // NetWordError
-                reject(createError('Network Error', config, null, '', error));
+                // reject(createError('Network Error', config, null, '', error))
+                reject(new AxiosError('Network Error', null, config, '', error));
             }
             break;
         case "baidu" /* 百度 */:
             // TODO error.errCode
-            reject(createError('Network Error', config, null, ''));
+            // reject(createError('Network Error', config, null, ''))
+            reject(new AxiosError('Network Error', null, config, ''));
             break;
     }
 }
@@ -193,6 +198,7 @@ function mpAdapter(config) {
         };
         // HTTP basic authentication
         if (config.auth) {
+            requestHeaders = {};
             var _a = [config.auth.username || '', config.auth.password || ''], username = _a[0], password = _a[1];
             requestHeaders.Authorization = 'Basic ' + encoder(username + ':' + password);
         }
@@ -202,7 +208,7 @@ function mpAdapter(config) {
             if ((typeof requestData === 'undefined' && _header === 'content-type') || _header === 'referer') {
                 // Remove Content-Type if data is undefined
                 // And the miniprogram document said that '设置请求的 header，header 中不能设置 Referer'
-                delete requestHeaders[key];
+                requestHeaders && delete requestHeaders[key];
             }
         });
         mpRequestOption.header = requestHeaders;
