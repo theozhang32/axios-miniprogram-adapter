@@ -17,7 +17,8 @@ export default {
     // sourcemap: isProd
   },
   // 小程序不支持包内require别的包，必须把别的包也一起打包进来
-  external: isProd ? [] : common.external,
+  // external: isProd ? [] : common.external,
+  external: [],
   plugins: [
     json(),
     nodeResolve({
