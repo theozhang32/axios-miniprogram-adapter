@@ -12,3 +12,6 @@ rename.js
 .rpt2_cache
 .npmignore
 types
+.github
+.vscode
+.npmrc
